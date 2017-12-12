@@ -1,0 +1,31 @@
+{
+  "name": "mediawiki-api-base",
+  "description": "",
+  "version": "2.4.0",
+ 
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/addwiki/mediawiki-api-base.git"
+  },
+  "license": "GNU",
+  "bugs": {
+    "url": "https://github.com/addwiki/mediawiki-api-base/issues"
+  },
+  "homepage": "https://github.com/addwiki/mediawiki-api-base"
+}
+
+{
+  "name": "mediawiki-api-base",
+  "description": "",
+  "version": "1.0.0",
+ 
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tofika/tt-rss-api-php-class.git"
+  },
+  "license": "BSD",
+  "bugs": {
+    "url": "https://github.com/tofika/tt-rss-api-php-class/issues"
+  },
+  "homepage": "https://github.com/tofika/tt-rss-api-php-class"
+}
