@@ -31,8 +31,16 @@ if ($result->num_rows > 0) {
     	$common_name = false;
     	$mark_read = false;
         $category = array();
-	    $content = json_decode(file_get_contents("https://commons.wikimedia.org/w/api.php?action=parse&contentmodel=wikitext&format=json&page=File:".urlencode(str_replace(" ", "_", $row['title']))), true);
-        if (isset($content['error'])){
+
+        preg_match('/\.[^\.]+$/i',$row['title'],$ext);
+
+        if ($ext[0] == '.webm' || $ext[0] == '.ogv'){
+	       $content = json_decode(file_get_contents("https://commons.wikimedia.org/w/api.php?action=parse&contentmodel=wikitext&format=json&page=File:".urlencode(str_replace(" ", "_", $row['title']))), true);
+        }
+        else{
+            $mark_read = true;
+        }
+        if (isset($content['error']) ||  $mark_read){
             $mark_read = true;
         }
         elseif (isset($content["parse"])) {          
@@ -49,9 +57,24 @@ if ($result->num_rows > 0) {
     	 	}
     	 	//get pubdate
             $content = json_decode(file_get_contents("https://commons.wikimedia.org/w/api.php?action=query&prop=imageinfo&iiprop=extmetadata&format=json&pageids=".$pageid), true);
-        	$pubdate = $content['query']['pages'][$pageid]['imageinfo'][0]['extmetadata']['DateTimeOriginal']['value'];
+            $pubdate = $content['query']['pages'][$pageid]['imageinfo'][0]['extmetadata']['DateTimeOriginal']['value'];
             if (strlen($pubdate) == 4){
                 $pubdate = $pubdate."-01-01";
+            }
+            if (!strtotime($pubdate)){
+                if(preg_match('/(20|19|18)[0-9]{2}.[0-9]{2}.[0-9]{2}/', $pubdate, $matches)){
+                    $pubdate = $matches[0];
+                }
+                elseif(preg_match('/[0-9]{2}.[0-9]{2}.(20|19|18)[0-9]{2}/', $pubdate, $matches)){
+                    $pubdate = $matches[0];
+                }
+                elseif(preg_match('/(20|19|18)[0-9]{2}/', $pubdate, $matches)){
+                    $pubdate = $matches[0].'-01-01';
+                }
+                else{
+                    $mark_read = true;
+                }
+
             }
             $pubdate = strtotime($pubdate);
 
