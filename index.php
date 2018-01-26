@@ -28,35 +28,39 @@ $result = $conn->query($sql);
 if ($result->num_rows > 0) {
     // output data of each row
     while($row = $result->fetch_assoc()) {
-    	$common_name = false;
-    	$mark_read = false;
-        $category = array();
+        $common_name = false;
+        $mark_read = false;
+        $category_patterns = false;
+        $categories = array();
 
         preg_match('/\.[^\.]+$/i',$row['title'],$ext);
 
         if ($ext[0] == '.webm' || $ext[0] == '.ogv'){
-	       $content = json_decode(file_get_contents("https://commons.wikimedia.org/w/api.php?action=parse&contentmodel=wikitext&format=json&page=File:".urlencode(str_replace(" ", "_", $row['title']))), true);
+           $content = json_decode(file_get_contents("https://commons.wikimedia.org/w/api.php?action=parse&contentmodel=wikitext&format=json&page=File:".urlencode(str_replace(" ", "_", $row['title']))), true);
         }
         else{
             $mark_read = true;
         }
-        if (isset($content['error']) ||  $mark_read){
+        if (isset($content['error']) ){
             $mark_read = true;
         }
-        elseif (isset($content["parse"])) {          
+        if (isset($content["parse"]) && !$mark_read) {          
         
-    	    $existingCategories = $content["parse"]["categories"];
-    	 	$pageid 	        = $content['parse']['pageid'];
-    	 	
-    	 	//find YouTube channel_id/username
-    	 	foreach ($content["parse"]["externallinks"] as $key => $value) {
-    	 		if (preg_match('/(https?:\/\/|)(www\.|)?youtube\.com\/(channel|user)\/([a-zA-Z0-9\-]+)/', $value, $matches)){
-    	 			$common_name = getCommonName($conn, $matches[3], $matches[4]);
-    	 			break;
-    	 		}	
-    	 	}
-    	 	//get pubdate
+            $existingCategories = $content["parse"]["categories"];
+            $pageid             = $content['parse']['pageid'];
+            
+            
+            //find YouTube channel_id/username
+            foreach ($content["parse"]["externallinks"] as $key => $value) {
+                if (preg_match('/(https?:\/\/|)(www\.|)?youtube\.com\/(channel|user)\/([a-zA-Z0-9\-]+)/', $value, $matches)){
+                    $common_name = getCommonName($conn, $matches[3], $matches[4]);
+                    $category_patterns = getCategoryPatterns($conn, $matches[3], $matches[4]);
+                    break;
+                }   
+            }
+            //get pubdate
             $content = json_decode(file_get_contents("https://commons.wikimedia.org/w/api.php?action=query&prop=imageinfo&iiprop=extmetadata&format=json&pageids=".$pageid), true);
+
             $pubdate = $content['query']['pages'][$pageid]['imageinfo'][0]['extmetadata']['DateTimeOriginal']['value'];
             if (strlen($pubdate) == 4){
                 $pubdate = $pubdate."-01-01";
@@ -78,54 +82,69 @@ if ($result->num_rows > 0) {
             }
             $pubdate = strtotime($pubdate);
 
-            //RN7 specific code
-        	if ($common_name == 'RN7'){
-                if( $pubdate < date(strtotime('2017-11-01'))){
-    			     $common_name = 'N1';
+            
+           if ($category_patterns){
+                $keys = array(
+                    '%Ymd'  => date('Ymd',  $pubdate),
+                    '%md'   => date('md',   $pubdate),
+                    '%Y'    => date('Y',    $pubdate),
+                    '%F'    => date('F',    $pubdate));
+
+                foreach ($category_patterns as $category_pattern) {
+                    if (preg_match(
+                        '/\b'.strtolower($category_pattern['needle']).'\b/', strtolower(
+                        $content['query']['pages'][$pageid]['imageinfo'][0]['extmetadata']['ObjectName']['value']." ".
+                        $content['query']['pages'][$pageid]['imageinfo'][0]['extmetadata']['ImageDescription']['value']))){
+                            $categories[] = '[[Category:'.str_replace(array_keys($keys), array_values($keys), $category_pattern['pattern']).']]';
+                    }
                 }
-                $category =  getRN7Cats(
-                    $content['query']['pages'][$pageid]['imageinfo'][0]['extmetadata']['ObjectName']['value']." ".
-                    $content['query']['pages'][$pageid]['imageinfo'][0]['extmetadata']['ImageDescription']['value'],  $pubdate );
-                var_dump($category);
-    		}
+            }
+
+            //RN7 specific code
+            if ($common_name == 'RN7' && $pubdate < date(strtotime('2017-11-01'))){
+                foreach ($categories as $key => $value) {
+                    $categories[$key] = str_replace('RN7', 'N1', $value);
+                }
+            }
             //is it needed to add category?
             foreach ($existingCategories as $key => $xcategory) {
-            	$xcategory = $xcategory['*'];
-            	
-            	if ($common_name && preg_match('/^'.$common_name.'_videos_in_'.date('Y',$pubdate).'/',$xcategory)){
-        			$mark_read = true;
-        			break;
-            	}
-                elseif (preg_match('/.*[vV]ideos_.+'.date('Y',$pubdate).'/',$xcategory)){
+                $xcategory = $xcategory["*"];
+
+                if ($category_patterns){
+                    foreach ($categories as $key => $category) {
+                        if(strpos($category, str_replace('_', ' ', $xcategory))){
+                            unset($categories[$key]);
+                        }
+                    }
+                }
+                elseif(preg_match('/.*[vV]ideos_.+'.date('Y',$pubdate).'/',$xcategory)){
                     $mark_read = true;
                     break;
                 }
             }
             if (!$mark_read){
-            	
-                if ($common_name){
-                   $category[] = "\n[[Category:".$common_name." videos in ".date('Y',$pubdate)."|".date('md',$pubdate)."]]";
-                }
-                else{
-            	   $category[] = "\n[[Category:Videos of ".date('Y',$pubdate)."|".date('md',$pubdate)."]]";
+                
+                if (!$category_patterns){
+                   $categories[] = "\n[[Category:Videos of ".date('Y',$pubdate)."|".date('md',$pubdate)."]]";
 
                 }
+				$categories = array_unique($categories);
 
-            	$category2 = stripSortKey($category);
+                $categories2 = stripSortKey($categories);
 
 
                 if (date('md', $pubdate) == '0101'){
                     //no sortkey if date is January 1st. Probably not an accurate date.
-                    $category = $category2;
+                    $categories = $categories2;
                 }
-            	
-            	try{
-        			$response = $api->postRequest( new SimpleRequest( 'edit',  
+                
+                try{
+                    $response = $api->postRequest( new SimpleRequest( 'edit',  
                     // var_dump(
                         array('pageid'    => $pageid, 
                               'token' => $api->getToken(), 
-                              'appendtext' => implode("\n", $category), 
-                              'summary'    => "Added ".implode(", ", $category2), 
+                              'appendtext' => implode("\n", $categories), 
+                              'summary'    => "Added ".implode(", ", $categories2), 
                               'bot' => true, 
                               'nocreate' => true, 
                               'redirect' => true )
@@ -135,15 +154,15 @@ if ($result->num_rows > 0) {
                         $mark_read = true;
                     }
 
-    			}
-    			catch ( UsageException $e ) {
-    			    echo "The api returned an error!";
-    			}
+                }
+                catch ( UsageException $e ) {
+                    echo "The api returned an error!";
+                }
             }
         }
 
         if ($mark_read == true){
-        	$conn->query("UPDATE ttrss_entries set entry_read = 1 where id =".$row['id']);
+            $conn->query("UPDATE ttrss_entries set entry_read = 1 where id =".$row['id']);
         }
 
     }
@@ -154,32 +173,18 @@ if ($result->num_rows > 0) {
 
 $conn->close();
 
-function getRN7Cats($teststring, $pubdate ){
-    if (strpos($teststring, "Nijmegen" ,1) || strpos($teststring, "Nijmeegse",1) ){
-        $cat[] = "[[Category:Videos of ".date('Y', $pubdate)." from Nijmegen|".date('md', $pubdate)."]]";
-    }
-
-    $needles = array('Arnhem', 'Druten', 'Heumen', 'Montferland', 'Oude IJsselstreek', 'Rijnwaarden', 'Wijchen', 'Zevenaar');
-
-    foreach($needles as $needle) {
-        if ( strpos($teststring, $needle)){
-            $cat[] = "[[Category:Videos from ".$needle."|".date('Ymd', $pubdate)."]]";
-        }
-    }
-    return $cat;
-
-}
-
 function stripSortKey($input){
     $output = array();
     if (!is_array($input)){
         $input = array($input);
     }
-    foreach ($input as $value) {
-        $output[] = preg_replace('/\[\[(.+)\|.+\]\]/i', '[[$1]]', $value);
+    foreach ($input as $key => $value) {
+        $output[$key] = preg_replace('/\[\[(.+)\|.+\]\]/i', '[[$1]]', $value);
     }
     return $output;
+
 }
+
 function getCommonName($conn, $label, $name){
     if ($label == 'channel'){
         $label = 'channel_id';
@@ -198,4 +203,27 @@ function getCommonName($conn, $label, $name){
     }
 
 }
+
+function getCategoryPatterns($conn, $label, $name){
+    if ($label == 'channel'){
+        $label = 'channel_id';
+    }
+    else{
+        $label = 'youtube_username';
+    }
+    $patterns = array();
+    $sql = 'SELECT needle, pattern from channel_patterns LEFT JOIN youtube_channels USING (channel_id) WHERE '.$label.' = "'.mysqli_real_escape_string($conn, $name).'"';
+    $result = $conn->query($sql);
+    if ($result) {
+        while($row = $result->fetch_assoc()) {
+            $patterns[] = array('needle'=> $row['needle'], 'pattern' => $row['pattern']);
+        }
+        return $patterns;
+    }
+    else{
+        return false;
+    }
+
+}
+
 ?>
