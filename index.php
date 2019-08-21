@@ -117,7 +117,7 @@ if ($result->num_rows > 0) {
                         }
                     }
                 }
-                elseif(preg_match('/.*[vV]ideos_.+'.date('Y',$pubdate).'/',$xcategory)){
+                elseif(preg_match('/.*[vV]ideos.*/',$xcategory) && strpos($xcategory, date('Y',$pubdate))){
                     $mark_read = true;
                     break;
                 }
