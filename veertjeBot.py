@@ -9,8 +9,6 @@ import time
 import re
 from googleapiclient.discovery import build
 
-SCOPES = ["https://www.googleapis.com/auth/youtube.force-ssl"]
-
 
 class VeertjeBot:
     """
