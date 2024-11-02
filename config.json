@@ -1,0 +1,43 @@
+{
+    "youtube_api_key": "YOUTUBE_API_KEY",
+    "author_info": {
+        "mainsnak": {
+            "snaktype": "somevalue",
+            "property": "P170"
+        },
+        "type": "statement",
+        "rank": "normal",
+        "qualifiers": {
+            "P2093": [
+                {
+                    "snaktype": "value",
+                    "property": "P2093",
+                    "datavalue": {
+                        "value": "Vera de Kok",
+                        "type": "string"
+                    }
+                }
+            ],
+            "P3267": [
+                {
+                    "snaktype": "value",
+                    "property": "P4174",
+                    "datavalue": {
+                        "value": "1Veertje",
+                        "type": "string"
+                    }
+                }
+            ],
+            "P2699": [
+                {
+                    "snaktype": "value",
+                    "property": "P2699",
+                    "datavalue": {
+                        "value": "http://commons.wikimedia.org/wiki/User:1Veertje",
+                        "type": "string"
+                    }
+                }
+            ]
+        }
+    }
+}
