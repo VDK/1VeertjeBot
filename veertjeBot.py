@@ -1,20 +1,21 @@
 #!/usr/bin/python
 # -*- coding: utf-8-sig -*-
-import requests
 import csv
-import feedparser
 import json
-import pywikibot
-import time
 import re
+import time
+import requests
+import feedparser
+import pywikibot
 from googleapiclient.discovery import build
+
 
 
 class VeertjeBot:
     """
-    A bot to enrich and create paintings on Wikidata
+    A bot to adjust metadata in recent uploads of 1Veertje
     """
-    def __init__(self, config_file="config.json"):
+    def __init__(self):
         """
         Arguments:
             * generator    - A generator that yields Dict objects.
@@ -29,9 +30,7 @@ class VeertjeBot:
         self.wd = self.wd.data_repository()
         self.youtube_channels = self.load_youtube_channels()
         
-        with open(config_file, 'r', encoding='utf-8') as f:
-            config = json.load(f)
-
+        config = self.load_config()
         # Initialize YouTube API client with the loaded API key
         self.youtube = build('youtube', 'v3', developerKey=config['youtube_api_key'])
 
@@ -60,6 +59,10 @@ class VeertjeBot:
                 self.addCatBasedOnDepicts(page)
             elif page.title().endswith(".webm"):
                 self.categorizeVideos(page)
+                
+    def load_config(self, config_file="config.json"):
+        with open(config_file, 'r', encoding='utf-8') as f:
+            return json.load(f)
                 
     def load_youtube_channels(self, csv_file="youtube_channels.csv"):
         # Dictionary to hold data from the CSV file
