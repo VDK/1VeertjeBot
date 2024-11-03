@@ -6,11 +6,11 @@ This bot is designed to enrich and adjust metadata for recent uploads on Wikimed
 
 ## Features
 
-- **YouTube Metadata Integration**: Uses the YouTube Data API to fetch and add video details, such as title, description, and publication date.
+- **YouTube Metadata Integration**: Uses the YouTube Data API to fetch and add video details, such as title, description, and publication date, to recently uploaded screenshots.
 - **Author Information Updates**: Adjusts author details to reflect accurate information, using structured data claims.
 - **Category Management**: Automatically adds categories based on `depicts` statements and YouTube channel information.
 - **Structured Data Claims**: Removes or updates specific structured data claims (such as creator or license) as needed.
-- **CSV Integration for Channel Metadata**: Loads YouTube channel metadata from a CSV file for categorization.
+- **CSV Integration for Channel Metadata**: Loads YouTube channel metadata from a CSV file to assist in video categorization based on channel information.
 
 ## Requirements
 
