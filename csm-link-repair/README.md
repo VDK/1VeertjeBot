@@ -47,6 +47,11 @@ Two details matter:
   never from the title — `"It's"` slugifies to `it-s-` and the snapshot is missed
 * a page can carry several snapshots; prefer the newest JSON-LD-bearing one
 
+### Do not re-open these four
+`V (Vanessa Hudgens album)`, `Unfabulous and More`,
+`Strange Days at Blake Holsey High` and `Goodbye (Kristinia DeBarge song)`
+were fixed by hand during review. They are deliberately **not** in the pairs,
+even where an older unarchived citation was still on the page.
 ## Running it
 
 Copy `csm_replace_pairs.txt` and `replace_pages.txt` next to your pywikibot
