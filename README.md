@@ -4,6 +4,11 @@
 
 This bot is designed to enrich and adjust metadata for recent uploads on Wikimedia Commons by the user **1Veertje**. It performs tasks such as adding structured data claims, categorizing videos based on YouTube metadata, updating author information, and managing categories based on specific metadata fields.
 
+## Jobs
+
+* [`csm-link-repair/`](csm-link-repair/): repair dead Common Sense Media
+  links on enwiki with two `replace.py` commands (`-pairsfile` + `-file`).
+
 ## Features
 
 - **YouTube Metadata Integration**: Uses the YouTube Data API to fetch and add video details, such as title, description, and publication date, to recently uploaded screenshots.
