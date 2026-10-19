@@ -47,13 +47,6 @@ Two details matter:
   never from the title — `"It's"` slugifies to `it-s-` and the snapshot is missed
 * a page can carry several snapshots; prefer the newest JSON-LD-bearing one
 
-### Do not re-open these four
-
-`V (Vanessa Hudgens album)`, `Unfabulous and More`,
-`Strange Days at Blake Holsey High` and `Goodbye (Kristinia DeBarge song)`
-were fixed by hand during review. They are deliberately **not** in the pairs,
-even where an older unarchived citation was still on the page.
-
 ## Running it
 
 Copy `csm_replace_pairs.txt` and `replace_pages.txt` next to your pywikibot
@@ -86,20 +79,6 @@ Verified in a full dry run: **109 pairs over 110 pages, 110 edits, 0 refusals,
 0 errors.** Every pair in the file produces exactly one edit, so there is no
 dead weight left to skip at run time. Three groups are deliberately absent:
 
-* the four hand-fixed review pages (previous section) - they must not be
-  re-opened;
-* the two semi-protected pages (next section) - the bot cannot edit them;
-* three pages the reviewer fixed by hand in the meantime (*Brother Bear
-  (soundtrack)*, *Here Come the ABCs*, *Set Me Free (Marion Raven album)*). They
-  no longer carry the old citation, so their pairs were dropped.
-
-### The two pages that are excluded
-
-`Miley Cyrus` and `Big Time Rush (group)` are semi-protected
-(`edit=autoconfirmed`) and `1VeertjeBot` is only in `*`/`user` on enwiki, so it
-cannot edit them. Their citations are therefore **not** in the pairs and a run
-will not touch them at all. Fix those two by hand, or first get the bot
-autoconfirmed there.
 
 ## Background
 
