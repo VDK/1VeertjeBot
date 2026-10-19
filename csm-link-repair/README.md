@@ -47,6 +47,28 @@ Two details matter:
   never from the title — `"It's"` slugifies to `it-s-` and the snapshot is missed
 * a page can carry several snapshots; prefer the newest JSON-LD-bearing one
 
+### The four awkward ones
+
+These four are not plain `{{cite web}}` citations, so each needed its own
+treatment. The reviewer name in every case comes from the archived page
+(`Reviewed By:` in old snapshots, `Review.author.name` in newer JSON-LD).
+
+| page | old shape | fix |
+| --- | --- | --- |
+| `V (Vanessa Hudgens album)` | cite with the `/details` URL archived on archive.today, title "Kids Music - Music Reviews" | rewrite to the real slug, Wayback 2008-02-14, author Tony Whittum |
+| `Unfabulous and More` | `review.php?id=4515&type=Music`, marketing title, no author | rewrite, Wayback 2007-12-15, author Kathi Kamen Goldmark |
+| `Strange Days at Blake Holsey High` | bare external link in Further reading, wrapped in `{{Webarchive}}` | turn into a real `{{cite web}}`, author Sarah L. Thomson |
+| `Goodbye (Kristinia DeBarge song)` | `author=This review was written by Jacqueline Rupp`, `url-status=live` | split into `last`/`first`, `url-status=dead` |
+
+Two things that bit us:
+
+* the old snapshots (2005-2008) carry **no** JSON-LD, so the author is only
+  available from the rendered byline; the live pages now redirect to the movie
+  index, so the snapshot is the only source left
+* one pair contains an en dash (`"Goodbye" (CD single) - Music Review`); write it
+  with an explicit `\u2013`, or a shell heredoc turns it into mojibake and the
+  pair silently never matches
+
 ## Running it
 
 Copy `csm_replace_pairs.txt` and `replace_pages.txt` next to your pywikibot
@@ -69,16 +91,20 @@ python pwb.py replace -lang:en -family:wikipedia \
 ```
 
 `csm_replace_pairs.txt` is a `-pairsfile`: **line 1 = old text, line 2 = new
-text, line 3 = next old text**, and so on. 109 pairs = 218 lines, no newlines
+text, line 3 = next old text**, and so on. 113 pairs = 226 lines, no newlines
 inside any pair, so it is one replacement per citation. One pair can serve
-several pages, which is why 109 pairs cover 110 pages.
+several pages, which is why 113 pairs cover 114 pages.
 
 `-simulate` respects `-always` and shows the real diff without saving.
 
-Verified in a full dry run: **109 pairs over 110 pages, 110 edits, 0 refusals,
-0 errors.** Every pair in the file produces exactly one edit, so there is no
-dead weight left to skip at run time. Three groups are deliberately absent:
-
+Verified in a full dry run: **113 pairs over 114 pages, 114 edits, 0 refusals,
+0 errors.** Every old text in the file was re-checked against the live wikitext
+immediately before that run, so each pair fires on exactly the page it belongs
+to. Two pages are not in the file because the bot cannot edit them (`Miley Cyrus`,
+`Big Time Rush (group)`: `edit=autoconfirmed`, and `1VeertjeBot` is only in
+`*`/`user` on enwiki). Three others were fixed by hand before this run, so their
+old citation no longer exists (*Brother Bear (soundtrack)*, *Here Come the ABCs*,
+*Set Me Free (Marion Raven album)*).
 
 ## Background
 
