@@ -77,8 +77,14 @@ python pwb.py replace -lang:en -family:wikipedia \
 text, line 3 = next old text**, and so on. 115 pairs = 230 lines, no newlines
 inside any pair, so it is one replacement per citation.
 
-`-simulate` respects `-always` and shows the real diff without saving. Verified
-in a full dry run: 115 pairs over 115 pages, 113 processed, 2 refused (below).
+`-simulate` respects `-always` and shows the real diff without saving.
+Verified in a full dry run (115 pairs over 115 pages):
+* **110** pages get the edit
+* **2** refused as semi-protected (below)
+* **3** no longer match: `Brother Bear (soundtrack)`, `Here Come the ABCs` and
+  `Set Me Free (Marion Raven album)` were edited by hand in the meantime, so
+  their old citation is gone. `replace.py` silently skips them, which is the
+  desired behaviour ??? nothing is overwritten.
 
 ### The two pages that cannot be edited
 
