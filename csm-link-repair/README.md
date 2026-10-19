@@ -48,10 +48,12 @@ Two details matter:
 * a page can carry several snapshots; prefer the newest JSON-LD-bearing one
 
 ### Do not re-open these four
+
 `V (Vanessa Hudgens album)`, `Unfabulous and More`,
 `Strange Days at Blake Holsey High` and `Goodbye (Kristinia DeBarge song)`
 were fixed by hand during review. They are deliberately **not** in the pairs,
 even where an older unarchived citation was still on the page.
+
 ## Running it
 
 Copy `csm_replace_pairs.txt` and `replace_pages.txt` next to your pywikibot
@@ -74,24 +76,30 @@ python pwb.py replace -lang:en -family:wikipedia \
 ```
 
 `csm_replace_pairs.txt` is a `-pairsfile`: **line 1 = old text, line 2 = new
-text, line 3 = next old text**, and so on. 115 pairs = 230 lines, no newlines
-inside any pair, so it is one replacement per citation.
+text, line 3 = next old text**, and so on. 109 pairs = 218 lines, no newlines
+inside any pair, so it is one replacement per citation. One pair can serve
+several pages, which is why 109 pairs cover 110 pages.
 
 `-simulate` respects `-always` and shows the real diff without saving.
-Verified in a full dry run (115 pairs over 115 pages):
-* **110** pages get the edit
-* **2** refused as semi-protected (below)
-* **3** no longer match: `Brother Bear (soundtrack)`, `Here Come the ABCs` and
-  `Set Me Free (Marion Raven album)` were edited by hand in the meantime, so
-  their old citation is gone. `replace.py` silently skips them, which is the
-  desired behaviour ??? nothing is overwritten.
 
-### The two pages that cannot be edited
+Verified in a full dry run: **109 pairs over 110 pages, 110 edits, 0 refusals,
+0 errors.** Every pair in the file produces exactly one edit, so there is no
+dead weight left to skip at run time. Three groups are deliberately absent:
+
+* the four hand-fixed review pages (previous section) - they must not be
+  re-opened;
+* the two semi-protected pages (next section) - the bot cannot edit them;
+* three pages the reviewer fixed by hand in the meantime (*Brother Bear
+  (soundtrack)*, *Here Come the ABCs*, *Set Me Free (Marion Raven album)*). They
+  no longer carry the old citation, so their pairs were dropped.
+
+### The two pages that are excluded
 
 `Miley Cyrus` and `Big Time Rush (group)` are semi-protected
-(`edit=autoconfirmed`). `1VeertjeBot` is only in `*`/`user` on enwiki, so
-`replace.py` prints `WARNING: You can't edit page` and skips them. Either edit
-those two by hand or first get the bot autoconfirmed there.
+(`edit=autoconfirmed`) and `1VeertjeBot` is only in `*`/`user` on enwiki, so it
+cannot edit them. Their citations are therefore **not** in the pairs and a run
+will not touch them at all. Fix those two by hand, or first get the bot
+autoconfirmed there.
 
 ## Background
 
