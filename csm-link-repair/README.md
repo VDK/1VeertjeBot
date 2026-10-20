@@ -99,9 +99,39 @@ several pages, which is why 112 pairs cover 113 pages.
 Verified in a full dry run: **112 pairs over 113 pages, 113 edits, 0 refusals,
 0 errors.** Every old text in the file was re-checked against the live wikitext
 immediately before that run, so each pair fires on exactly the page it belongs
-to. Two pages are not in the file because the bot cannot edit them (`Miley Cyrus`,
-`Big Time Rush (group)`: `edit=autoconfirmed`, and `1VeertjeBot` is only in
-`*`/`user` on enwiki).
+to.
+
+### Run as the main account, not the bot
+
+The run uses **`1Veertje`** (`-user:1Veertje`), not `1VeertjeBot`. The bot
+account is only in `*`/`user` on enwiki, while the main account is
+`extendedconfirmed` — which matters for the two semi-protected pages
+(`Miley Cyrus`, `Big Time Rush (group)`: `edit=autoconfirmed`). A bot password
+for `1Veertje` already exists in `user-password.py`, so no extra config is
+needed.
+
+Always pass `-family:wikipedia -lang:en`; without them pywikibot falls back to
+the `commons` family in `user-config.py` and every page is reported missing.
+
+### Never let a pair add a parameter that is already there
+
+Citation/CS1 treats `last`/`last1`/`author`, `first`/`first1`,
+`archive-url`/`archiveurl`, `archive-date`/`archivedate` and
+`access-date`/`accessdate` as the *same* parameter. An unconditional append
+therefore renders a visible warning in the article:
+
+```
+{{cite web}}: More than one of |last1= and |last= specified (help);
+More than one of |first1= and |first= specified (help)
+```
+
+19 of the 112 pairs originally did this, hitting 25 of the 113 pages. They are
+now deduplicated inside the replacement text (`fix_pairs.py`). The match count
+is unchanged (119 replacements over 113 pages), and a rendered check confirms the
+warning is gone.
+
+Guard before publishing: walk each replacement text and make sure no logical
+parameter appears twice, using the alias map in `fix_pairs.py`.
 
 ## Background
 
