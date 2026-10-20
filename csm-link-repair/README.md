@@ -101,6 +101,29 @@ Verified in a full dry run: **112 pairs over 113 pages, 113 edits, 0 refusals,
 immediately before that run, so each pair fires on exactly the page it belongs
 to.
 
+### Status: executed
+
+The live run was done with exactly the command above (no `-simulate`), as
+`1Veertje`: **113 pages read, 113 written, 0 errors, 18m53s.**
+
+Post-audit over the live wikitext of all 113 pages (123 CSM citations):
+
+* 0 citations with a duplicated logical parameter (the earlier 25 are gone)
+* 2 citations carry no archive at all, and neither was in scope
+  (`I See the Light`, `Miranda Cosgrove` — different URL families)
+* 12 citations still show a retired `.html` live `url=`; all 12 are pairs that
+  deliberately keep the dead URL and add `archive-url` + `url-status=dead`,
+  which is the correct {{cite web}} end state. Verified: every one of them has a
+  14-digit Wayback snapshot and `url-status=dead`.
+
+### Overview page
+
+`http://localhost/csm/` (`build_overview.py`) is rebuilt for the final scope: one
+section per page — `V (Vanessa Hudgens album)`, `Unfabulous and More`,
+`Goodbye (Kristinia DeBarge song)` — each listing the citation's review title,
+author, date, URL, and a **separate status column** that reports 404 vs redirect
+for that URL, plus the archive snapshot and its status.
+
 ### Run as the main account, not the bot
 
 The run uses **`1Veertje`** (`-user:1Veertje`), not `1VeertjeBot`. The bot
